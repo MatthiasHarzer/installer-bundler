@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	root "installer-bundler"
-	"installer-bundler/commands/build"
+	"installer-bundler/commands/bundle"
 
 	"github.com/spf13/cobra"
 )
@@ -18,7 +18,7 @@ var command = &cobra.Command{
 }
 
 func init() {
-	command.AddCommand(build.Command)
+	command.AddCommand(bundle.Command)
 }
 
 func main() {

@@ -1,4 +1,4 @@
-package build
+package bundle
 
 import (
 	"fmt"
@@ -64,8 +64,8 @@ func getOutputFilePath() string {
 }
 
 var Command = &cobra.Command{
-	Use:   "build",
-	Short: "Builds the project",
+	Use:   "bundle",
+	Short: "Bundles the references executables",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		outputFilePath := getOutputFilePath()
 
