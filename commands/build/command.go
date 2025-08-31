@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"runtime"
 	"strings"
 
 	root "installer-bundler"
 	"installer-bundler/core"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 )
 
@@ -55,7 +57,7 @@ func getOutputFilePath() string {
 	if outputFile == "" {
 		outputFilePath = "installer-runtime"
 	}
-	if !strings.HasSuffix(outputFilePath, ".exe") && os.Getenv("GOOS") == "windows" {
+	if !strings.HasSuffix(outputFilePath, ".exe") && runtime.GOOS == "windows" {
 		outputFilePath += ".exe"
 	}
 	return outputFilePath
@@ -83,16 +85,20 @@ var Command = &cobra.Command{
 		bundler := core.NewBundler(items, root.InstallerRuntimeFS, filesDir)
 
 		if embedded {
+			color.Yellow("Embedding binaries into the executable")
+
+			// Download files if not already downloaded
 			for _, item := range items {
-				isDownloaded, _ := bundler.IsDownloaded(item)
+				isDownloaded, filePath := bundler.IsDownloaded(item)
 				if !isDownloaded {
-					fmt.Println("Downloading:", item.Title)
-					_, err := bundler.Download(item)
+					fmt.Printf(`Downloading "%s"`, item.Title)
+					filePath, err := bundler.Download(item)
 					if err != nil {
 						return err
 					}
+					color.Green(`- Saved to "%s"`, filePath)
 				} else {
-					fmt.Println("Already downloaded:", item.Title)
+					color.Yellow(`Already downloaded "%s" to "%s"`, item.Title, filePath)
 				}
 			}
 

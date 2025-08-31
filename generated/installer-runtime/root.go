@@ -5,7 +5,7 @@ import (
 	"io/fs"
 )
 
-//go:embed files/*
+//go:embed files
 var files embed.FS
 var Files fs.FS
 
