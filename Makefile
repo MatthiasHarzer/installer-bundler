@@ -1,4 +1,4 @@
-
+BUILD_VERSION ?= "unknown"
 
 generate-runtime:
 	# It is required to rename the go.mod file in order for it to be embedded. To keep development of
@@ -9,8 +9,8 @@ generate-runtime:
 	mv generated/installer-runtime/go.mod generated/installer-runtime/go.mod.embed
 
 build: generate-runtime
-	@GOOS=windows GOARCH=amd64 go build -o build/bundler-windows-amd64.exe commands/main.go
-	@GOOS=linux GOARCH=amd64 go build -o build/bundler-linux-amd64 commands/main.go
+	@GOOS=windows GOARCH=amd64 go build -o build/bundler-windows-amd64.exe -ldflags "-X root.Version=$(BUILD_VERSION)" commands/main.go
+	@GOOS=linux GOARCH=amd64 go build -o build/bundler-linux-amd64 -ldflags "-X root.Version=$(BUILD_VERSION)" commands/main.go
 
 .PHONY:	build \
 		generate-runtime \
