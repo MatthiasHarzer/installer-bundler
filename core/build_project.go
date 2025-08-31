@@ -79,9 +79,14 @@ func (b *Bundler) build(cfg config, destinationFile string) error {
 		return err
 	}
 
-	outputFile := fmt.Sprintf("%s/build/installer-runtime.exe", buildDir)
+	var builtFile string
+	if os.Getenv("GOOS") == "windows" {
+		builtFile = fmt.Sprintf("%s/build/installer-runtime.exe", buildDir)
+	} else {
+		builtFile = fmt.Sprintf("%s/build/installer-runtime", buildDir)
+	}
 
-	err = fsutil.MoveFile(outputFile, destinationFile)
+	err = fsutil.MoveFile(builtFile, destinationFile)
 	if err != nil {
 		return fmt.Errorf("failed to move built file to destination: %w", err)
 	}

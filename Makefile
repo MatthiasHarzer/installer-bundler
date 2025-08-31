@@ -10,6 +10,7 @@ generate-runtime:
 
 build: generate-runtime
 	@GOOS=windows GOARCH=amd64 go build -o build/bundler-windows-amd64.exe commands/main.go
+	@GOOS=linux GOARCH=amd64 go build -o build/bundler-linux-amd64 commands/main.go
 
 .PHONY:	build \
 		generate-runtime \

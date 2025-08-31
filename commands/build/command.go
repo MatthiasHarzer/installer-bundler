@@ -17,7 +17,7 @@ var embedded bool
 var file string
 
 func init() {
-	Command.Flags().StringVarP(&outputFile, "output", "o", "output.exe", "Output file")
+	Command.Flags().StringVarP(&outputFile, "output", "o", "", "Output file")
 	Command.Flags().BoolVarP(&embedded, "embedded", "e", false, "Embedded binaries")
 	Command.Flags().StringVarP(&file, "file", "f", "", "File containing list of items (title and link separated by comma, one item per line)")
 }
@@ -50,17 +50,22 @@ func loadItemsFromFile(filePath string) ([]core.Item, error) {
 	return result, nil
 }
 
+func getOutputFilePath() string {
+	outputFilePath := outputFile
+	if outputFile == "" {
+		outputFilePath = "installer-runtime"
+	}
+	if !strings.HasSuffix(outputFilePath, ".exe") && os.Getenv("GOOS") == "windows" {
+		outputFilePath += ".exe"
+	}
+	return outputFilePath
+}
+
 var Command = &cobra.Command{
 	Use:   "build",
 	Short: "Builds the project",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if outputFile == "" {
-			outputFile = "installer-runtime.exe"
-		}
-
-		if !strings.HasSuffix(outputFile, ".exe") {
-			outputFile += ".exe"
-		}
+		outputFilePath := getOutputFilePath()
 
 		if file == "" {
 			return fmt.Errorf("please provide a file containing the list of items using the --file flag")
@@ -91,15 +96,15 @@ var Command = &cobra.Command{
 				}
 			}
 
-			err = bundler.BuildProjectEmbedded(outputFile)
+			err = bundler.BuildProjectEmbedded(outputFilePath)
 		} else {
-			err = bundler.BuildProjectURL(outputFile)
+			err = bundler.BuildProjectURL(outputFilePath)
 		}
 		if err != nil {
 			return err
 		}
 
-		fmt.Println("Build successful:", outputFile)
+		fmt.Println("Build successful:", outputFilePath)
 
 		return nil
 	},
