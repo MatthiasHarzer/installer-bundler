@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 
 	root "installer-runtime"
 	"installer-runtime/config"
@@ -22,17 +23,26 @@ var directory string
 var itemNames []string
 
 func init() {
-	defaultDownloadDir, err := windowsutil.GetKnownFolderPath(windowsutil.DownloadsFolder)
-	if err != nil {
-		defaultDownloadDir = "."
-	}
-
-	Command.Flags().StringVarP(&directory, "directory", "d", defaultDownloadDir, "Directory to save files to")
+	Command.Flags().StringVarP(&directory, "directory", "d", "", "Directory to save files to")
 	Command.Flags().StringArrayVarP(&itemNames, "item", "i", []string{}, "Names of items to download (if empty, all items will be downloaded)")
 }
 
 func getDownloadDir() string {
-	p := path.Clean(directory)
+	var err error
+	p := directory
+	if p == "" {
+		switch runtime.GOOS {
+		case "windows":
+			p, err = windowsutil.GetKnownFolderPath(windowsutil.DownloadsFolder)
+			if err != nil {
+				p = path.Join(os.Getenv("USERPROFILE"), "Downloads")
+			}
+		default:
+			p = path.Join(os.Getenv("HOME"), "Downloads")
+		}
+	}
+
+	p = path.Clean(p)
 
 	if path.IsAbs(p) {
 		return p

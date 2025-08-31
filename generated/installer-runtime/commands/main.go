@@ -19,7 +19,7 @@ var command = &cobra.Command{
 	Use:   "installer-runtime",
 	Short: "Downloads or runs installer files",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("installer-runtime", root.Version)
+		fmt.Println("installer-runtime version", root.Version)
 	},
 }
 
