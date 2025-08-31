@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"path"
 
 	"installer-bundler/util/fsutil"
 )
@@ -18,13 +19,23 @@ type Item struct {
 type Bundler struct {
 	items            []Item
 	runtimeProjectFS fs.FS
+	fileCacheDir     string
 }
 
-func NewBundler(items []Item, runtimeProject fs.FS) *Bundler {
+func NewBundler(items []Item, runtimeProject fs.FS, fileCacheDir string) *Bundler {
 	return &Bundler{
 		items:            items,
 		runtimeProjectFS: runtimeProject,
+		fileCacheDir:     fileCacheDir,
 	}
+}
+
+func (b *Bundler) filePath(fileName string) string {
+	return path.Join(b.fileCacheDir, fileName)
+}
+
+func (b *Bundler) runtimeFilesPath(filename string) string {
+	return fmt.Sprintf("%s/%s", runtimeFilesDir, filename)
 }
 
 func (b *Bundler) GetItems() []Item {
@@ -42,13 +53,13 @@ func (b *Bundler) IsDownloaded(item Item) (bool, string) {
 		return false, ""
 	}
 
-	path := filePath(filename)
+	path := b.filePath(filename)
 	exists := fsutil.FileExists(path)
 	if !exists {
 		return false, ""
 	}
 
-	return true, path
+	return true, b.runtimeFilesPath(filename)
 }
 
 func (b *Bundler) Download(item Item) (string, error) {
@@ -83,17 +94,17 @@ func (b *Bundler) Download(item Item) (string, error) {
 		return "", err
 	}
 
-	err = os.MkdirAll(filesBaseDir, os.ModePerm)
+	err = os.MkdirAll(b.fileCacheDir, os.ModePerm)
 	if err != nil {
 		return "", err
 	}
 
 	temporaryDownloadFile.Close()
-	fp = filePath(filename)
+	fp = b.filePath(filename)
 	err = fsutil.MoveFile(temporaryDownloadFile.Name(), fp)
 	if err != nil {
 		return "", err
 	}
 
-	return fp, nil
+	return b.runtimeFilesPath(filename), nil
 }

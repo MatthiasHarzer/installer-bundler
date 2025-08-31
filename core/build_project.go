@@ -21,12 +21,8 @@ const (
 	ModeEmbedded Mode = "embedded"
 )
 
-const configFile = "config/config.json"
-const filesBaseDir = "files"
-
-func filePath(fileName string) string {
-	return path.Join(filesBaseDir, fileName)
-}
+const runtimeConfigFile = "config/config.json"
+const runtimeFilesDir = "files"
 
 type configItem struct {
 	Name string  `json:"name"`
@@ -51,7 +47,7 @@ func (b *Bundler) build(cfg config, destinationFile string) error {
 		return fmt.Errorf("failed to copy runtime project files: %w", err)
 	}
 
-	err = cp.Copy(filesBaseDir, path.Join(buildDir, filesBaseDir))
+	err = cp.Copy(b.fileCacheDir, path.Join(buildDir, runtimeFilesDir))
 	if err != nil {
 		return fmt.Errorf("failed to copy files directory: %w", err)
 	}
@@ -61,7 +57,7 @@ func (b *Bundler) build(cfg config, destinationFile string) error {
 		return err
 	}
 
-	configFilePath := fmt.Sprintf("%s/%s", buildDir, configFile)
+	configFilePath := fmt.Sprintf("%s/%s", buildDir, runtimeConfigFile)
 
 	err = os.WriteFile(configFilePath, data, 0644)
 	if err != nil {

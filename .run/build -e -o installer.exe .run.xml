@@ -2,7 +2,7 @@
   <configuration default="false" name="build -e -o installer.exe " type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="installer-bundler" />
     <working_directory value="$PROJECT_DIR$" />
-    <parameters value="build -e -o installer.exe" />
+    <parameters value="build -e -o installer.exe -f test_file.txt" />
     <kind value="FILE" />
     <package value="installer-bundler" />
     <directory value="$PROJECT_DIR$" />
