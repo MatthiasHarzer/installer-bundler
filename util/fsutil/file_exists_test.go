@@ -3,7 +3,7 @@ package fsutil_test
 import (
 	"testing"
 
-	"installer-runtime/util/fsutil"
+	"installer-bundler/util/fsutil"
 
 	"github.com/stretchr/testify/require"
 )
