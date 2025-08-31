@@ -9,7 +9,7 @@ generate-runtime:
 	mv generated/installer-runtime/go.mod generated/installer-runtime/go.mod.embed
 
 build: generate-runtime
-	@GOOS=windows GOARCH=amd64 go build -o build/installer-windows-amd64.exe main.go
+	@GOOS=windows GOARCH=amd64 go build -o build/bundler-windows-amd64.exe commands/main.go
 
 .PHONY:	build \
 		generate-runtime \

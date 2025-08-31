@@ -54,6 +54,10 @@ var Command = &cobra.Command{
 	Use:   "build",
 	Short: "Builds the project",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		if outputFile == "" {
+			outputFile = "installer-runtime.exe"
+		}
+
 		if !strings.HasSuffix(outputFile, ".exe") {
 			outputFile += ".exe"
 		}
