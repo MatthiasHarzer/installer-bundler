@@ -1,19 +1,21 @@
 package core
 
+import "io/fs"
+
 type Item struct {
 	Title string
 	Link  string
 }
 
 type Bundler struct {
-	items      []Item
-	runtimeDir string
+	items            []Item
+	runtimeProjectFS fs.FS
 }
 
-func NewBundler(items []Item, runtimeDir string) *Bundler {
+func NewBundler(items []Item, runtimeProject fs.FS) *Bundler {
 	return &Bundler{
-		items:      items,
-		runtimeDir: runtimeDir,
+		items:            items,
+		runtimeProjectFS: runtimeProject,
 	}
 }
 

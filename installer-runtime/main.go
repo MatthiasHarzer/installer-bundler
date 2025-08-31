@@ -4,12 +4,14 @@ import (
 	"fmt"
 
 	"installer-runtime/commands/download"
+	"installer-runtime/commands/list"
 
 	"github.com/spf13/cobra"
 )
 
 func init() {
 	command.AddCommand(download.Command)
+	command.AddCommand(list.Command)
 }
 
 var version = "unknown"

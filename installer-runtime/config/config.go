@@ -15,6 +15,7 @@ type Item struct {
 
 type Config struct {
 	Items []*Item `json:"items"`
+	Mode  string  `json:"mode"`
 }
 
 func GetConfig() (*Config, error) {

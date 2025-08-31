@@ -1,32 +1,78 @@
 package main
 
-import "installer-bundler/core"
+import (
+	"embed"
+	"fmt"
+	"io/fs"
 
-var items = map[string]string{
-	"Chrome":  "https://dl.google.com/chrome/install/375.126/chrome_installer.exe",
-	"Firefox": "https://download-installer.cdn.mozilla.net/pub/firefox/releases/113.0/win64/en-US/Firefox%20Setup%20113.0.exe",
-	"VLC":     "https://get.videolan.org/vlc/3.0.18/win64/vlc-3.0.18-win64.exe",
-	"7-Zip":   "https://www.7-zip.org/a/7z1900-x64.exe",
+	"installer-bundler/commands/build"
+	"installer-bundler/util/fsutil"
+
+	"github.com/spf13/cobra"
+)
+
+//go:embed build/installer-runtime
+var installerRuntime embed.FS
+
+var version = "unknown"
+
+var command = &cobra.Command{
+	Use:   "installer-bundler",
+	Short: "Bundles multiple installer files into a single executable",
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("installer-bundler version", version)
+	},
+}
+
+func init() {
+	runtimeFS, err := fs.Sub(installerRuntime, "build/installer-runtime")
+	if err != nil {
+		panic(err)
+	}
+
+	embedFS := fsutil.GoModuleEmbedFS(runtimeFS, "go.mod.embed")
+	//fs.WalkDir(embedFS, ".", func(path string, d fs.DirEntry, err error) error {
+	//	if err != nil {
+	//		return err
+	//	}
+	//	fmt.Println("Embedded file:", path)
+	//	return nil
+	//})
+
+	build.InstallerRuntime = embedFS
+	command.AddCommand(build.Command)
 }
 
 func main() {
-	var coreItems []core.Item
-	for title, link := range items {
-		coreItems = append(coreItems, core.Item{
-			Title: title,
-			Link:  link,
-		})
-	}
-	bundler := core.NewBundler(coreItems, "installer-runtime")
-	projectDir, err := bundler.GenerateProject()
+	err := command.Execute()
 	if err != nil {
 		panic(err)
 	}
 
-	installerPath, err := core.BuildProject(projectDir)
-	if err != nil {
-		panic(err)
-	}
+	// The following code is commented out to prevent automatic execution during tests.
+	// Uncomment to enable building the installer.
 
-	println("Installer built at:", installerPath)
+	//println("Building installer with the following items:")
+	//for title, link := range items {
+	//	println("-", title+":", link)
+	//}
+	//var coreItems []core.Item
+	//for title, link := range items {
+	//	coreItems = append(coreItems, core.Item{
+	//		Title: title,
+	//		Link:  link,
+	//	})
+	//}
+	//bundler := core.NewBundler(coreItems, "installer-runtime")
+	//projectDir, err := bundler.GenerateProject()
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//installerPath, err := core.BuildProject(projectDir)
+	//if err != nil {
+	//	panic(err)
+	//}
+	//
+	//println("Installer built at:", installerPath)
 }
