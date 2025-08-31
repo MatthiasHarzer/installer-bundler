@@ -12,19 +12,19 @@ import (
 )
 
 type Runtime struct {
-	cfg         config.Config
-	downloadDir string
+	cfg             config.Config
+	OutputDirectory string
 }
 
-func NewRuntime(cfg config.Config, downloadDir string) *Runtime {
+func NewRuntime(cfg config.Config, outputDirectory string) *Runtime {
 	return &Runtime{
-		cfg:         cfg,
-		downloadDir: downloadDir,
+		cfg:             cfg,
+		OutputDirectory: outputDirectory,
 	}
 }
 
-func (r *Runtime) filePath(fileName string) string {
-	return fmt.Sprintf("%s/%s", r.downloadDir, fileName)
+func (r *Runtime) FilePath(fileName string) string {
+	return fmt.Sprintf("%s/%s", r.OutputDirectory, fileName)
 }
 
 func (r *Runtime) GetItems(names []string) []*config.Item {
@@ -45,17 +45,17 @@ func (r *Runtime) GetItems(names []string) []*config.Item {
 }
 
 func (r *Runtime) IsDownloaded(item config.Item) (bool, string) {
-	response, err := http.Head(item.URL)
+	response, err := http.Head(*item.URL)
 	if err != nil || response.StatusCode != http.StatusOK {
 		return false, ""
 	}
 
-	filename, err := getFileName(response.Header, item.URL)
+	filename, err := getFileName(response.Header, *item.URL)
 	if err != nil {
 		return false, ""
 	}
 
-	filePath := r.filePath(filename)
+	filePath := r.FilePath(filename)
 	exists := fsutil.FileExists(filePath)
 	if !exists {
 		return false, ""
@@ -65,7 +65,7 @@ func (r *Runtime) IsDownloaded(item config.Item) (bool, string) {
 }
 
 func (r *Runtime) DownloadItem(item config.Item) (string, error) {
-	response, err := http.Get(item.URL)
+	response, err := http.Get(*item.URL)
 	if err != nil {
 		return "", err
 	}
@@ -74,7 +74,7 @@ func (r *Runtime) DownloadItem(item config.Item) (string, error) {
 		return "", fmt.Errorf("failed to download file: %s", response.Status)
 	}
 
-	filename, err := getFileName(response.Header, item.URL)
+	filename, err := getFileName(response.Header, *item.URL)
 	if err != nil {
 		return "", err
 	}
@@ -91,15 +91,15 @@ func (r *Runtime) DownloadItem(item config.Item) (string, error) {
 		return "", err
 	}
 
-	if !fsutil.FileExists(r.downloadDir) {
-		err = os.MkdirAll(r.downloadDir, os.ModePerm)
+	if !fsutil.FileExists(r.OutputDirectory) {
+		err = os.MkdirAll(r.OutputDirectory, os.ModePerm)
 		if err != nil {
 			return "", err
 		}
 	}
 
 	temporaryDownloadFile.Close()
-	filePath := r.filePath(filename)
+	filePath := r.FilePath(filename)
 	err = fsutil.MoveFile(temporaryDownloadFile.Name(), filePath)
 	if err != nil {
 		return "", err

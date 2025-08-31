@@ -1,0 +1,14 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="build -e -o installer.exe " type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="installer-bundler" />
+    <working_directory value="$PROJECT_DIR$" />
+    <parameters value="build -e -o installer.exe" />
+    <kind value="PACKAGE" />
+    <package value="installer-bundler" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$" />
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="false" run_configuration_name="generate-runtime" run_configuration_type="ShConfigurationType" />
+    </method>
+  </configuration>
+</component>

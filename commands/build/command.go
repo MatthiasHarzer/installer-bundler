@@ -19,9 +19,11 @@ var items = map[string]string{
 
 var InstallerRuntime fs.FS
 var outputFile string
+var embedded bool
 
 func init() {
 	Command.Flags().StringVarP(&outputFile, "output", "o", "output.exe", "Output file")
+	Command.Flags().BoolVarP(&embedded, "embedded", "e", false, "Embedded binaries")
 }
 
 var Command = &cobra.Command{
@@ -41,7 +43,26 @@ var Command = &cobra.Command{
 		}
 
 		bundler := core.NewBundler(coreItems, InstallerRuntime)
-		err := bundler.BuildProject(outputFile)
+
+		var err error
+		if embedded {
+			for _, item := range coreItems {
+				isDownloaded, _ := bundler.IsDownloaded(item)
+				if !isDownloaded {
+					fmt.Println("Downloading:", item.Title)
+					_, err := bundler.Download(item)
+					if err != nil {
+						return err
+					}
+				} else {
+					fmt.Println("Already downloaded:", item.Title)
+				}
+			}
+
+			err = bundler.BuildProjectEmbedded(outputFile)
+		} else {
+			err = bundler.BuildProjectURL(outputFile)
+		}
 		if err != nil {
 			return err
 		}

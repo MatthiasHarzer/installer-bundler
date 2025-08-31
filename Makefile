@@ -2,6 +2,8 @@
 generate-runtime:
 	# It is required to rename the go.mod file in order for it to be embedded. To keep development of
 	# the runtime module easier, we generate a copy of the runtime with a renamed go.mod file.
+	rm -rf build/installer-runtime
+	mkdir -p build
 	cp -r installer-runtime build
 	mv build/installer-runtime/go.mod build/installer-runtime/go.mod.embed
 

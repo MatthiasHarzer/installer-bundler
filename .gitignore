@@ -3,3 +3,4 @@ installer-runtime/config/config.json
 installer-runtime/.downloads
 installer-runtime/bin
 build/
+files/

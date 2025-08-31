@@ -18,7 +18,11 @@ var Command = &cobra.Command{
 		println("Mode:", cfg.Mode)
 		println("Available installer items:")
 		for _, item := range cfg.Items {
-			println("-", item.Name+":", item.URL)
+			if cfg.Mode == config.ModeURL {
+				println("-", item.Name+":", *item.URL)
+			} else {
+				println("-", item.Name+":", *item.File)
+			}
 		}
 
 		return nil

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	root "installer-runtime"
 	"installer-runtime/commands/download"
 	"installer-runtime/commands/list"
 
@@ -14,13 +15,11 @@ func init() {
 	command.AddCommand(list.Command)
 }
 
-var version = "unknown"
-
 var command = &cobra.Command{
 	Use:   "installer-runtime",
 	Short: "Downloads or runs installer files",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("installer-runtime", version)
+		fmt.Println("installer-runtime", root.Version)
 	},
 }
 

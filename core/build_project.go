@@ -7,21 +7,37 @@ import (
 	"os/exec"
 	"path"
 
+	cp "github.com/otiai10/copy"
+
 	"installer-bundler/util/fsutil"
 )
 
+type Mode string
+
+const (
+	ModeURL      Mode = "url"
+	ModeEmbedded Mode = "embedded"
+)
+
 const configFile = "config/config.json"
+const filesBaseDir = "files"
+
+func filePath(fileName string) string {
+	return path.Join(filesBaseDir, fileName)
+}
 
 type configItem struct {
-	Name string `json:"name"`
-	URL  string `json:"url"`
+	Name string  `json:"name"`
+	URL  *string `json:"url,omitempty"`
+	File *string `json:"file,omitempty"`
 }
 
 type config struct {
 	Items []configItem `json:"items"`
+	Mode  Mode         `json:"mode"`
 }
 
-func (b *Bundler) BuildProject(destinationFile string) error {
+func (b *Bundler) build(cfg config, destinationFile string) error {
 	buildDir, cleanup, err := fsutil.CreateTempDirectory()
 	if err != nil {
 		return err
@@ -33,13 +49,11 @@ func (b *Bundler) BuildProject(destinationFile string) error {
 		return fmt.Errorf("failed to copy runtime project files: %w", err)
 	}
 
-	cfg := config{}
-	for _, item := range b.items {
-		cfg.Items = append(cfg.Items, configItem{
-			Name: item.Title,
-			URL:  item.Link,
-		})
+	err = cp.Copy(filesBaseDir, path.Join(buildDir, filesBaseDir))
+	if err != nil {
+		return fmt.Errorf("failed to copy files directory: %w", err)
 	}
+
 	data, err := json.MarshalIndent(cfg, "", "  ")
 	if err != nil {
 		return err
@@ -75,4 +89,41 @@ func (b *Bundler) BuildProject(destinationFile string) error {
 	}
 
 	return nil
+}
+
+func (b *Bundler) BuildProjectURL(destinationFile string) error {
+	cfg := config{
+		Mode: ModeURL,
+	}
+	for _, item := range b.items {
+		cfg.Items = append(cfg.Items, configItem{
+			Name: item.Title,
+			URL:  &item.Link,
+		})
+	}
+
+	return b.build(cfg, destinationFile)
+}
+
+func (b *Bundler) BuildProjectEmbedded(destinationFile string) error {
+	cfg := config{
+		Mode: ModeEmbedded,
+	}
+	for _, item := range b.items {
+		isDownloaded, file := b.IsDownloaded(item)
+		if !isDownloaded {
+			var err error
+			file, err = b.Download(item)
+			if err != nil {
+				return fmt.Errorf("failed to download item %s: %w", item.Title, err)
+			}
+		}
+
+		cfg.Items = append(cfg.Items, configItem{
+			Name: item.Title,
+			File: &file,
+		})
+	}
+
+	return b.build(cfg, destinationFile)
 }

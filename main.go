@@ -69,7 +69,7 @@ func main() {
 	//	panic(err)
 	//}
 	//
-	//installerPath, err := core.BuildProject(projectDir)
+	//installerPath, err := core.BuildProjectURL(projectDir)
 	//if err != nil {
 	//	panic(err)
 	//}

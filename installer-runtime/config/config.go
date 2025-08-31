@@ -8,14 +8,22 @@ import (
 //go:embed config.json
 var configData []byte
 
+type Mode string
+
+const (
+	ModeURL      Mode = "url"
+	ModeEmbedded Mode = "embedded"
+)
+
 type Item struct {
-	Name string `json:"name"`
-	URL  string `json:"url"`
+	Name string  `json:"name"`
+	URL  *string `json:"url"`
+	File *string `json:"file"`
 }
 
 type Config struct {
 	Items []*Item `json:"items"`
-	Mode  string  `json:"mode"`
+	Mode  Mode    `json:"mode"`
 }
 
 func GetConfig() (*Config, error) {
