@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"path"
 
+	root "installer-bundler"
+
 	cp "github.com/otiai10/copy"
 
 	"installer-bundler/util/fsutil"
@@ -72,7 +74,7 @@ func (b *Bundler) build(cfg config, destinationFile string) error {
 		return fmt.Errorf("failed to create destination directory: %w", err)
 	}
 
-	cmd := exec.Command("make", "build")
+	cmd := exec.Command("make", "build", fmt.Sprintf("BUILD_VESION=%s", root.Version))
 	cmd.Dir = buildDir
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

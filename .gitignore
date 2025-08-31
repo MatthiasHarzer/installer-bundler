@@ -4,3 +4,4 @@ installer-runtime/.downloads
 installer-runtime/bin
 build/
 files/
+*.exe

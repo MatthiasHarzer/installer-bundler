@@ -2,9 +2,9 @@ package build
 
 import (
 	"fmt"
-	"io/fs"
 	"strings"
 
+	root "installer-bundler"
 	"installer-bundler/core"
 
 	"github.com/spf13/cobra"
@@ -17,7 +17,6 @@ var items = map[string]string{
 	"7-Zip":   "https://www.7-zip.org/a/7z1900-x64.exe",
 }
 
-var InstallerRuntime fs.FS
 var outputFile string
 var embedded bool
 
@@ -42,7 +41,7 @@ var Command = &cobra.Command{
 			})
 		}
 
-		bundler := core.NewBundler(coreItems, InstallerRuntime)
+		bundler := core.NewBundler(coreItems, root.InstallerRuntimeFS)
 
 		var err error
 		if embedded {

@@ -3,10 +3,10 @@
     <module name="installer-bundler" />
     <working_directory value="$PROJECT_DIR$" />
     <parameters value="build -e -o installer.exe" />
-    <kind value="PACKAGE" />
+    <kind value="FILE" />
     <package value="installer-bundler" />
     <directory value="$PROJECT_DIR$" />
-    <filePath value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/commands/main.go" />
     <method v="2">
       <option name="RunConfigurationTask" enabled="false" run_configuration_name="generate-runtime" run_configuration_type="ShConfigurationType" />
     </method>
