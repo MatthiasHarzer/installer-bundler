@@ -3,10 +3,10 @@
     <module name="installer-runtime" />
     <working_directory value="$PROJECT_DIR$" />
     <parameters value="download -d ./.downloads" />
-    <kind value="PACKAGE" />
+    <kind value="FILE" />
     <package value="installer-runtime" />
     <directory value="$PROJECT_DIR$" />
-    <filePath value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/commands/main.go" />
     <method v="2" />
   </configuration>
 </component>

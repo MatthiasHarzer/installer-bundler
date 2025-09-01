@@ -5,6 +5,7 @@ import (
 
 	root "installer-runtime"
 	"installer-runtime/commands/extract"
+	"installer-runtime/commands/install"
 	"installer-runtime/commands/list"
 
 	"github.com/spf13/cobra"
@@ -12,6 +13,7 @@ import (
 
 func init() {
 	command.AddCommand(extract.Command)
+	command.AddCommand(install.Command)
 	command.AddCommand(list.Command)
 }
 

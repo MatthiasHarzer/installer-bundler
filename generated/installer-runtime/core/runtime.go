@@ -6,6 +6,8 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"os/exec"
+	"path"
 	"strings"
 
 	"installer-runtime/config"
@@ -26,6 +28,23 @@ func NewRuntime(cfg config.Config, outputDirectory string, filesFS fs.FS) *Runti
 	}
 }
 
+func (r *Runtime) getFileName(item config.Item) (string, error) {
+	if item.File != nil {
+		return path.Base(*item.File), nil
+	}
+
+	if item.URL != nil {
+		response, err := http.Head(*item.URL)
+		if err != nil || response.StatusCode != http.StatusOK {
+			return "", fmt.Errorf("failed to get file name from URL: %s", *item.URL)
+		}
+
+		return getFileNameFromHeader(response.Header, *item.URL)
+	}
+
+	return "", fmt.Errorf("item has neither URL nor File specified")
+}
+
 func (r *Runtime) FilePath(fileName string) string {
 	return fmt.Sprintf("%s/%s", r.OutputDirectory, fileName)
 }
@@ -38,7 +57,7 @@ func (r *Runtime) GetItems(names []string) []*config.Item {
 	var filtered []*config.Item
 	for _, itemName := range names {
 		for _, item := range r.cfg.Items {
-			if strings.EqualFold(itemName, itemName) {
+			if strings.EqualFold(item.Name, itemName) {
 				filtered = append(filtered, item)
 				break
 			}
@@ -47,13 +66,8 @@ func (r *Runtime) GetItems(names []string) []*config.Item {
 	return filtered
 }
 
-func (r *Runtime) IsDownloaded(item config.Item) (bool, string) {
-	response, err := http.Head(*item.URL)
-	if err != nil || response.StatusCode != http.StatusOK {
-		return false, ""
-	}
-
-	filename, err := getFileName(response.Header, *item.URL)
+func (r *Runtime) IsExtracted(item config.Item) (bool, string) {
+	filename, err := r.getFileName(item)
 	if err != nil {
 		return false, ""
 	}
@@ -77,7 +91,7 @@ func (r *Runtime) DownloadItem(item config.Item) (string, error) {
 		return "", fmt.Errorf("failed to download file: %s", response.Status)
 	}
 
-	filename, err := getFileName(response.Header, *item.URL)
+	filename, err := getFileNameFromHeader(response.Header, *item.URL)
 	if err != nil {
 		return "", err
 	}
@@ -111,32 +125,6 @@ func (r *Runtime) DownloadItem(item config.Item) (string, error) {
 	return filePath, nil
 }
 
-func (r *Runtime) IsCopied(item config.Item) (bool, string) {
-	if item.File == nil {
-		return false, ""
-	}
-
-	sourcePath := *item.File
-	file, err := r.files.Open(sourcePath)
-	if err != nil {
-		return false, ""
-	}
-	defer file.Close()
-
-	stat, err := file.Stat()
-	if err != nil {
-		return false, ""
-	}
-
-	destPath := r.FilePath(stat.Name())
-	exists := fsutil.FileExists(destPath)
-	if !exists {
-		return false, ""
-	}
-
-	return true, destPath
-}
-
 func (r *Runtime) CopyItem(item config.Item) (string, error) {
 	sourcePath := *item.File
 
@@ -160,10 +148,39 @@ func (r *Runtime) CopyItem(item config.Item) (string, error) {
 
 	destPath := r.FilePath(stat.Name())
 	destFile, err := os.Create(destPath)
-	if err == nil {
-		destFile.Close()
+	if err != nil {
 		return destPath, nil
+	}
+	defer destFile.Close()
+
+	_, err = io.Copy(destFile, file)
+	if err != nil {
+		return "", err
 	}
 
 	return destPath, nil
+}
+
+func (r *Runtime) Install(item config.Item, shouldDetach bool) (*exec.Cmd, error) {
+	isExtracted, filePath := r.IsExtracted(item)
+	if !isExtracted {
+		return nil, fmt.Errorf("item not found: %s", item.Name)
+	}
+
+	cmd := exec.Command(filePath)
+
+	if shouldDetach {
+		err := cmd.Start()
+		if err != nil {
+			return nil, err
+		}
+		return cmd, nil
+	}
+
+	err := cmd.Run()
+	if err != nil {
+		return nil, err
+	}
+
+	return cmd, nil
 }

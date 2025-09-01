@@ -4,3 +4,4 @@ installer-runtime/bin
 build/
 files/
 *.exe
+*.test.json

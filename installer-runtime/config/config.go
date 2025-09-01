@@ -3,6 +3,7 @@ package config
 import (
 	_ "embed"
 	"encoding/json"
+	"os"
 )
 
 //go:embed config.json
@@ -29,6 +30,22 @@ type Config struct {
 func GetConfig() (*Config, error) {
 	var cfg Config
 	err := json.Unmarshal(configData, &cfg)
+	if err != nil {
+		return nil, err
+	}
+	return &cfg, nil
+}
+
+func GetConfigFromFile(path string) (*Config, error) {
+	var cfg Config
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&cfg)
 	if err != nil {
 		return nil, err
 	}

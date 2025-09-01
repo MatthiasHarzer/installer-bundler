@@ -1,8 +1,9 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="download -d ./.downloads" type="GoApplicationRunConfiguration" factoryName="Go Application">
+  <configuration default="false" name="install -d ./.downloads -i Firefox" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="installer-runtime" />
     <working_directory value="$PROJECT_DIR$" />
-    <parameters value="download -d ./.downloads" />
+    <parameters value="install -d ./.downloads -c config.test.json -p" />
+    <sudo value="true" />
     <kind value="FILE" />
     <package value="installer-runtime" />
     <directory value="$PROJECT_DIR$" />

@@ -20,7 +20,7 @@ var itemNames []string
 
 func init() {
 	Command.Flags().StringVarP(&directory, "directory", "d", "", "Directory to save files to")
-	Command.Flags().StringArrayVarP(&itemNames, "item", "i", []string{}, "Names of items to downloadFiles (if empty, all items will be downloaded)")
+	Command.Flags().StringArrayVarP(&itemNames, "item", "i", []string{}, "Names of items to download (if empty, all items will be downloaded)")
 }
 
 func getDownloadDir() string {
@@ -53,11 +53,11 @@ func getDownloadDir() string {
 	return p
 }
 
-func downloadFiles(runtime *core.Runtime, items []*config.Item) {
+func DownloadFiles(runtime *core.Runtime, items []*config.Item) {
 	color.Green(`Downloading %d file(s) to "%s"`, len(items), runtime.OutputDirectory)
 
 	for _, item := range items {
-		isDownloaded, filePath := runtime.IsDownloaded(*item)
+		isDownloaded, filePath := runtime.IsExtracted(*item)
 		if isDownloaded {
 			color.Yellow(`Skipping "%s" - already downloaded to "%s"`, item.Name, filePath)
 			continue
@@ -68,7 +68,7 @@ func downloadFiles(runtime *core.Runtime, items []*config.Item) {
 		filePath, err := runtime.DownloadItem(*item)
 		if err != nil {
 			fmt.Printf(" - ")
-			color.Red("Failed: %s\n", err.Error())
+			color.Red("ailed: %s\n", err.Error())
 			continue
 		}
 
@@ -77,11 +77,11 @@ func downloadFiles(runtime *core.Runtime, items []*config.Item) {
 	}
 }
 
-func copyFiles(runtime *core.Runtime, items []*config.Item) {
+func CopyFiles(runtime *core.Runtime, items []*config.Item) {
 	color.Green(`Copying %d file(s) to "%s"`, len(items), runtime.OutputDirectory)
 
 	for _, item := range items {
-		isCopied, filePath := runtime.IsCopied(*item)
+		isCopied, filePath := runtime.IsExtracted(*item)
 		if isCopied {
 			color.Yellow(`Skipping "%s" - already copied to "%s"`, item.Name, filePath)
 			continue
@@ -92,66 +92,13 @@ func copyFiles(runtime *core.Runtime, items []*config.Item) {
 		filePath, err := runtime.CopyItem(*item)
 		if err != nil {
 			fmt.Printf(" - ")
-			color.Red("Failed: %s\n", err.Error())
+			color.Red("failed: %s\n", err.Error())
 			continue
 		}
 
 		copiedFile := path.Clean(filePath)
 		color.Green(` - saved to "%s"`, copiedFile)
 	}
-
-	//err := fs.WalkDir(root.Files, ".", func(p string, d fs.DirEntry, err error) error {
-	//	if err != nil {
-	//		return err
-	//	}
-	//
-	//	fpath, err := filepath.Localize(p)
-	//	if err != nil {
-	//		return err
-	//	}
-	//	newPath := path.Join(outputDirectory, fpath)
-	//
-	//	if fsutil.FileExists(newPath) {
-	//		return nil
-	//	}
-	//
-	//	switch d.Type() {
-	//	case os.ModeDir:
-	//		return os.MkdirAll(newPath, 0777)
-	//	case 0:
-	//		fmt.Printf(color.WhiteString(`Copying "%s"`), p)
-	//
-	//		r, err := root.Files.Open(p)
-	//		if err != nil {
-	//			return err
-	//		}
-	//		defer r.Close()
-	//		info, err := r.Stat()
-	//		if err != nil {
-	//			return err
-	//		}
-	//		w, err := os.OpenFile(newPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, 0666|info.Mode()&0777)
-	//		if err != nil {
-	//			return err
-	//		}
-	//
-	//		if _, err := io.Copy(w, r); err != nil {
-	//			w.Close()
-	//			return &os.PathError{Op: "Copy", Path: newPath, Err: err}
-	//		}
-	//
-	//		color.Green(" - Saved to %s\n", newPath)
-	//
-	//		return w.Close()
-	//	default:
-	//		return &os.PathError{Op: "CopyFS", Path: p, Err: os.ErrInvalid}
-	//	}
-	//})
-	//
-	//if err != nil {
-	//	color.Red("Failed to copy files: %s\n", err.Error())
-	//	return
-	//}
 }
 
 var Command = &cobra.Command{
@@ -170,9 +117,9 @@ var Command = &cobra.Command{
 
 		switch cfg.Mode {
 		case config.ModeURL:
-			downloadFiles(runtime, filteredItems)
+			DownloadFiles(runtime, filteredItems)
 		case config.ModeEmbedded:
-			copyFiles(runtime, filteredItems)
+			CopyFiles(runtime, filteredItems)
 		default:
 			return fmt.Errorf("unknown mode: %s", cfg.Mode)
 		}

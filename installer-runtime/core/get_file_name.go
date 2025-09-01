@@ -20,7 +20,7 @@ func randomString(n int) string {
 	return string(b)
 }
 
-func getFileName(header http.Header, fileURL string) (string, error) {
+func getFileNameFromHeader(header http.Header, fileURL string) (string, error) {
 	var filename string
 	contentDisposition := header.Get("Content-Disposition")
 	if contentDisposition != "" {
