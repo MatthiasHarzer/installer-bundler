@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"strings"
@@ -13,12 +14,14 @@ import (
 
 type Runtime struct {
 	cfg             config.Config
+	files           fs.FS
 	OutputDirectory string
 }
 
-func NewRuntime(cfg config.Config, outputDirectory string) *Runtime {
+func NewRuntime(cfg config.Config, outputDirectory string, filesFS fs.FS) *Runtime {
 	return &Runtime{
 		cfg:             cfg,
+		files:           filesFS,
 		OutputDirectory: outputDirectory,
 	}
 }
@@ -106,4 +109,61 @@ func (r *Runtime) DownloadItem(item config.Item) (string, error) {
 	}
 
 	return filePath, nil
+}
+
+func (r *Runtime) IsCopied(item config.Item) (bool, string) {
+	if item.File == nil {
+		return false, ""
+	}
+
+	sourcePath := *item.File
+	file, err := r.files.Open(sourcePath)
+	if err != nil {
+		return false, ""
+	}
+	defer file.Close()
+
+	stat, err := file.Stat()
+	if err != nil {
+		return false, ""
+	}
+
+	destPath := r.FilePath(stat.Name())
+	exists := fsutil.FileExists(destPath)
+	if !exists {
+		return false, ""
+	}
+
+	return true, destPath
+}
+
+func (r *Runtime) CopyItem(item config.Item) (string, error) {
+	sourcePath := *item.File
+
+	file, err := r.files.Open(sourcePath)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	stat, err := file.Stat()
+	if err != nil {
+		return "", err
+	}
+
+	if !fsutil.FileExists(r.OutputDirectory) {
+		err = os.MkdirAll(r.OutputDirectory, os.ModePerm)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	destPath := r.FilePath(stat.Name())
+	destFile, err := os.Create(destPath)
+	if err == nil {
+		destFile.Close()
+		return destPath, nil
+	}
+
+	return destPath, nil
 }

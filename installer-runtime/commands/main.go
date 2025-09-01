@@ -4,14 +4,14 @@ import (
 	"fmt"
 
 	root "installer-runtime"
-	"installer-runtime/commands/download"
+	"installer-runtime/commands/extract"
 	"installer-runtime/commands/list"
 
 	"github.com/spf13/cobra"
 )
 
 func init() {
-	command.AddCommand(download.Command)
+	command.AddCommand(extract.Command)
 	command.AddCommand(list.Command)
 }
 
