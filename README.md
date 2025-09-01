@@ -21,6 +21,6 @@ Download the [latest release](https://github.com/MatthiasHarzer/installer-bundle
 2. Run `installer-bundler bundle -f <resource-file> -o <output-file>` to create the installer binary.
     - To include the binaries directly, instead of downloading them at runtime, use the `--embed` / `-e` flag. This will greatly increase the size of the installer binary.
 3. Use the generated installer binary:
-   - `<output-file> list` to list all included files.
-   - `<output-file> download -d <download-dir>` to download all files, or copy them from the embedded resources if the `--embed` / `-e` flag was used during bundling.
-   - PLANNED: `<output-file> install` to download and install all files (if applicable).
+   - `output.exe list` to list all included files.
+   - `output.exe extract -d <output-dir>` to download all files, or copy them from the embedded resources if the `--embed` / `-e` flag was used during bundling.
+   - `output.exe install` to extract and install all files (if applicable). Use the `--parallel` / `-p` flag to install all files in parallel.
