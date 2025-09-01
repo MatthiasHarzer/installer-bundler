@@ -1,0 +1,37 @@
+version: 2
+updates:
+- package-ecosystem: gomod
+  directory: "/"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 10
+  labels:
+  - Dependencies
+  allow:
+  - dependency-type: direct
+  commit-message:
+    prefix: chore
+    prefix-development: chore
+
+- package-ecosystem: gomod
+  directory: "/installer-runtime"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 10
+  labels:
+    - Dependencies
+  allow:
+    - dependency-type: direct
+  commit-message:
+    prefix: chore
+    prefix-development: chore
+
+- package-ecosystem: "github-actions"
+  directory: "/"
+  schedule:
+    interval: monthly
+  open-pull-requests-limit: 10
+  labels:
+  - Dependencies
+  commit-message:
+    prefix: chore
