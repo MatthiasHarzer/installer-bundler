@@ -3,5 +3,6 @@ installer-runtime/.downloads
 installer-runtime/bin
 build/
 files/
+generated/
 *.exe
 *.test.json
