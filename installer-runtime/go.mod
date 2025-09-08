@@ -7,7 +7,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.10
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.11.1
-	golang.org/x/sys v0.35.0
+	golang.org/x/sys v0.36.0
 )
 
 require (
